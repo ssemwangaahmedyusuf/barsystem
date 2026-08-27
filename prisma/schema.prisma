@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  pin          String   @unique
+  firstName    String
+  lastName     String
+  phone        String?
+  role         String   @default("WAITER")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Stock issued to this user when they are working as a waiter
+  stockIssuesAsWaiter StockIssue[] @relation("waiterUser")
+
+  // Stock returned by this user when they are working as a waiter
+  stockReturnsAsWaiter StockReturn[] @relation("waiterUser")
+
+  // User who issued stock / counter staff
+  stockIssuesAsIssuer StockIssue[] @relation("issuerUser")
+
+  // User who processed stock returns / counter staff
+  stockReturnsAsProcessor StockReturn[] @relation("processorUser")
+
+  // Orders handled by this waiter
+  ordersAsWaiter Order[] @relation("waiterOrders")
+
+  // Payments processed by this user
+  paymentsAsCashier Payment[] @relation("cashierPayments")
+
+  createdAtStockIssues  StockIssue[]  @relation("createdByUser")
+  createdAtStockReturns StockReturn[] @relation("createdByUser")
+
+  createdAtProducts Product[] @relation("productCreatedBy")
+  updatedAtProducts Product[] @relation("productUpdatedBy")
+
+  createdAtOrders Order[] @relation("orderCreatedBy")
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive])
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  sku          String?  @unique
+  description  String?
+  categoryId   String
+  unit         String   @default("bottle")
+  costPrice    Float    @default(0)
+  sellingPrice Float    @default(0)
+  currentStock Float    @default(0)
+  minimumStock Float    @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id])
+
+  stockIssues  StockIssueItem[]
+  stockReturns StockReturnItem[]
+  orderItems   OrderItem[]
+
+  createdById String?
+  createdBy   User?   @relation("productCreatedBy", fields: [createdById], references: [id])
+
+  updatedById String?
+  updatedBy   User?   @relation("productUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([categoryId])
+  @@index([name])
+  @@index([isActive])
+}
+
+model StockIssue {
+  id          String   @id @default(cuid())
+  issueNumber String   @unique
+  waiterId    String
+  issuerId    String
+  createdById String
+  notes       String?
+  status      String   @default("COMPLETED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  waiter    User @relation("waiterUser", fields: [waiterId], references: [id])
+  issuer    User @relation("issuerUser", fields: [issuerId], references: [id])
+  createdBy User @relation("createdByUser", fields: [createdById], references: [id])
+
+  items StockIssueItem[]
+
+  @@index([waiterId])
+  @@index([issuerId])
+  @@index([createdAt])
+}
+
+model StockIssueItem {
+  id           String   @id @default(cuid())
+  stockIssueId String
+  productId    String
+  quantity     Float
+  unitCost     Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  stockIssue StockIssue @relation(fields: [stockIssueId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@index([stockIssueId])
+  @@index([productId])
+}
+
+model StockReturn {
+  id           String   @id @default(cuid())
+  returnNumber String   @unique
+  waiterId     String
+  processorId  String
+  createdById  String
+  notes        String?
+  status       String   @default("COMPLETED")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  waiter    User @relation("waiterUser", fields: [waiterId], references: [id])
+  processor User @relation("processorUser", fields: [processorId], references: [id])
+  createdBy User @relation("createdByUser", fields: [createdById], references: [id])
+
+  items StockReturnItem[]
+
+  @@index([waiterId])
+  @@index([processorId])
+  @@index([createdAt])
+}
+
+model StockReturnItem {
+  id            String   @id @default(cuid())
+  stockReturnId String
+  productId     String
+  quantity      Float
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  stockReturn StockReturn @relation(fields: [stockReturnId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id])
+
+  @@index([stockReturnId])
+  @@index([productId])
+}
+
+model BarTable {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  capacity  Int?
+  status    String   @default("AVAILABLE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([status])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([phone])
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique
+  waiterId    String?
+  createdById String
+  tableId     String?
+  customerId  String?
+  status      String   @default("OPEN")
+  subtotal    Float    @default(0)
+  discount    Float    @default(0)
+  total       Float    @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  waiter    User?     @relation("waiterOrders", fields: [waiterId], references: [id])
+  createdBy User      @relation("orderCreatedBy", fields: [createdById], references: [id])
+  table     BarTable? @relation(fields: [tableId], references: [id])
+  customer  Customer? @relation(fields: [customerId], references: [id])
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([waiterId])
+  @@index([createdById])
+  @@index([tableId])
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Float
+  unitPrice Float
+  total     Float
+  createdAt DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  paymentNumber String   @unique
+  orderId       String
+  cashierId     String
+  amount        Float
+  method        String
+  reference     String?
+  status        String   @default("COMPLETED")
+  createdAt     DateTime @default(now())
+
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  cashier User  @relation("cashierPayments", fields: [cashierId], references: [id])
+
+  @@index([orderId])
+  @@index([cashierId])
+  @@index([method])
+  @@index([createdAt])
+}
