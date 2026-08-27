@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import DeleteProductButton from "./DeleteProductButton";
+import RestockButton from "./RestockButton";
 
 export default async function ProductsPage() {
   const cookieStore = await cookies();
@@ -40,12 +41,13 @@ export default async function ProductsPage() {
               <th className="px-4 py-3 font-medium">Stock</th>
               <th className="px-4 py-3 font-medium">Status</th>
               {isManager && <th className="px-4 py-3 font-medium"></th>}
+              {isManager && <th className="px-4 py-3 font-medium"></th>}
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={isManager ? 6 : 5} className="px-4 py-6 text-center text-gray-500">
+                <td colSpan={isManager ? 7 : 5} className="px-4 py-6 text-center text-gray-500">
                   No products yet.
                 </td>
               </tr>
@@ -67,6 +69,18 @@ export default async function ProductsPage() {
                       </span>
                     )}
                   </td>
+                  {isManager && (
+                    <td className="relative px-4 py-3 text-right">
+                      {product.isActive && (
+                        <RestockButton
+                          productId={product.id}
+                          productName={product.name}
+                          currentStock={product.currentStock}
+                          unit={product.unit}
+                        />
+                      )}
+                    </td>
+                  )}
                   {isManager && (
                     <td className="px-4 py-3 text-right space-x-3">
                       {product.isActive && (
