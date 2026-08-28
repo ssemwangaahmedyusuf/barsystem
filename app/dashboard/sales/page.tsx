@@ -23,7 +23,7 @@ export default async function SalesPage({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const defaultFrom = new Date(today);
-  defaultFrom.setDate(defaultFrom.getDate() - 6); // last 7 days by default
+  defaultFrom.setDate(defaultFrom.getDate() - 6);
 
   const from = params.from ? new Date(params.from) : defaultFrom;
   const to = params.to ? new Date(params.to) : new Date();
@@ -37,7 +37,8 @@ export default async function SalesPage({
     orderBy: { createdAt: "desc" },
   });
 
-  const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+  const activeOrders = orders.filter((o) => o.status !== "CANCELLED");
+  const totalSales = activeOrders.reduce((sum, o) => sum + o.total, 0);
   const paidOrders = orders.filter((o) => o.status === "PAID");
   const totalCollected = paidOrders.reduce((sum, o) => sum + o.total, 0);
 
@@ -60,7 +61,7 @@ export default async function SalesPage({
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-gray-200 bg-white p-5">
           <p className="text-sm text-gray-600">Total Orders</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{orders.length}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900">{activeOrders.length}</p>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-5">
           <p className="text-sm text-gray-600">Total Sales Value</p>
@@ -93,7 +94,7 @@ export default async function SalesPage({
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="border-t border-gray-100">
+                <tr key={order.id} className={`border-t border-gray-100 ${order.status === "CANCELLED" ? "opacity-50" : ""}`}>
                   <td className="px-4 py-3 text-gray-900">{order.orderNumber}</td>
                   <td className="px-4 py-3 text-gray-600">{formatter.format(order.createdAt)}</td>
                   <td className="px-4 py-3 text-gray-600">{order.table?.name || "Counter"}</td>

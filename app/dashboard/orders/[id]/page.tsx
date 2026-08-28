@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import PaymentForm from "./PaymentForm";
+import CancelOrderButton from "./CancelOrderButton";
 
 export default async function OrderDetailPage({
   params,
@@ -8,6 +10,13 @@ export default async function OrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value;
+  const currentUser = userId
+    ? await prisma.user.findUnique({ where: { id: userId } })
+    : null;
+  const isManager = currentUser?.role === "MANAGER";
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -31,15 +40,20 @@ export default async function OrderDetailPage({
     timeStyle: "short",
   }).format(order.createdAt);
 
+  const canCancel = isManager && order.status !== "CANCELLED" && order.payments.length === 0;
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Order {order.orderNumber}</h1>
-      <p className="mt-1 text-sm text-gray-600">
-        {order.table?.name || "Counter"} · Waiter: {order.waiter?.firstName} {order.waiter?.lastName} · Status: {order.status}
-      </p>
-      <p className="mt-1 text-sm text-gray-500">
-        Placed: {formattedDate}
-      </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Order {order.orderNumber}</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            {order.table?.name || "Counter"} · Waiter: {order.waiter?.firstName} {order.waiter?.lastName} · Status: {order.status}
+          </p>
+          <p className="mt-1 text-sm text-gray-500">Placed: {formattedDate}</p>
+        </div>
+        {canCancel && <CancelOrderButton orderId={order.id} />}
+      </div>
 
       <div className="mt-6 grid grid-cols-3 gap-6">
         <div className="col-span-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -81,7 +95,11 @@ export default async function OrderDetailPage({
             </div>
           </div>
 
-          {balance > 0 ? (
+          {order.status === "CANCELLED" ? (
+            <p className="mt-4 border-t border-gray-100 pt-4 text-sm font-medium text-red-700">
+              This order was cancelled.
+            </p>
+          ) : balance > 0 ? (
             <div className="mt-4 border-t border-gray-100 pt-4">
               <PaymentForm orderId={order.id} balance={balance} />
             </div>

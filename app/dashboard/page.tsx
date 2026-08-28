@@ -6,7 +6,10 @@ export default async function DashboardPage() {
 
   const [todaysOrders, openOrders, allActiveProducts] = await Promise.all([
     prisma.order.findMany({
-      where: { createdAt: { gte: startOfToday } },
+      where: {
+        createdAt: { gte: startOfToday },
+        status: { not: "CANCELLED" },
+      },
     }),
     prisma.order.count({
       where: { status: "OPEN" },
