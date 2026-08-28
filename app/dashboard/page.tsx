@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
 export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value;
+  const currentUser = userId
+    ? await prisma.user.findUnique({ where: { id: userId } })
+    : null;
+  const isManager = currentUser?.role === "MANAGER";
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
@@ -34,13 +42,15 @@ export default async function DashboardPage() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <p className="text-sm text-gray-600">Today's Sales</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">
-            {todaysSales.toLocaleString()} UGX
-          </p>
-          <p className="mt-1 text-xs text-gray-500">{todaysOrderCount} order(s) today</p>
-        </div>
+        {isManager && (
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <p className="text-sm text-gray-600">Today's Sales</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900">
+              {todaysSales.toLocaleString()} UGX
+            </p>
+            <p className="mt-1 text-xs text-gray-500">{todaysOrderCount} order(s) today</p>
+          </div>
+        )}
 
         <div className="rounded-lg border border-gray-200 bg-white p-5">
           <p className="text-sm text-gray-600">Open Orders</p>
@@ -55,7 +65,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {lowStockProducts.length > 0 && (
+      {isManager && lowStockProducts.length > 0 && (
         <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-100 px-4 py-3">
             <h2 className="text-sm font-semibold text-gray-900">Low Stock Alerts</h2>
