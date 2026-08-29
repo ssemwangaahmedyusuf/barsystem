@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
     where: { id: { in: items.map((i: { productId: string }) => i.productId) } },
   });
 
-  // Check stock availability before creating the order
   for (const item of items as { productId: string; quantity: number }[]) {
     const product = products.find((p) => p.id === item.productId);
     if (!product) {
@@ -74,11 +73,17 @@ export async function POST(request: NextRequest) {
       include: { items: true },
     });
 
-    // Reduce stock for each product ordered
     for (const item of items as { productId: string; quantity: number }[]) {
       await tx.product.update({
         where: { id: item.productId },
         data: { currentStock: { decrement: item.quantity } },
+      });
+    }
+
+    if (tableId) {
+      await tx.barTable.update({
+        where: { id: tableId },
+        data: { status: "OCCUPIED" },
       });
     }
 

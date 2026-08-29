@@ -41,7 +41,6 @@ export async function POST(
   }
 
   await prisma.$transaction(async (tx) => {
-    // Restore stock for each item
     for (const item of order.items) {
       await tx.product.update({
         where: { id: item.productId },
@@ -53,6 +52,13 @@ export async function POST(
       where: { id },
       data: { status: "CANCELLED" },
     });
+
+    if (order.tableId) {
+      await tx.barTable.update({
+        where: { id: order.tableId },
+        data: { status: "AVAILABLE" },
+      });
+    }
   });
 
   return NextResponse.json({ success: true });

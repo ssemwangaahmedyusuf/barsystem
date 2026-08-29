@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header({
   userName,
@@ -15,13 +16,14 @@ export default function Header({
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
-      <h1 className="text-lg font-semibold text-gray-900">Bar Management System</h1>
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-700">Welcome, {userName}</span>
+    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
+      <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Bar Management System</h1>
+      <div className="flex items-center gap-3">
+        <span className="hidden text-sm text-gray-700 sm:inline dark:text-gray-300">Welcome, {userName}</span>
+        <ThemeToggle />
         <button
           onClick={handleLogout}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
         >
           Log Out
         </button>

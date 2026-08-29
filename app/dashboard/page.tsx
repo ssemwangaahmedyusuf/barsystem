@@ -36,62 +36,64 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         Welcome to your bar management dashboard.
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {isManager && (
-          <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <p className="text-sm text-gray-600">Today's Sales</p>
-            <p className="mt-1 text-2xl font-bold text-gray-900">
+          <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Today's Sales</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
               {todaysSales.toLocaleString()} UGX
             </p>
-            <p className="mt-1 text-xs text-gray-500">{todaysOrderCount} order(s) today</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">{todaysOrderCount} order(s) today</p>
           </div>
         )}
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <p className="text-sm text-gray-600">Open Orders</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{openOrders}</p>
-          <p className="mt-1 text-xs text-gray-500">Awaiting payment</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Open Orders</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{openOrders}</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Awaiting payment</p>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <p className="text-sm text-gray-600">Low Stock Items</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{lowStockProducts.length}</p>
-          <p className="mt-1 text-xs text-gray-500">At or below minimum stock</p>
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Low Stock Items</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{lowStockProducts.length}</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">At or below minimum stock</p>
         </div>
       </div>
 
       {isManager && lowStockProducts.length > 0 && (
-        <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-900">Low Stock Alerts</h2>
+        <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+          <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Low Stock Alerts</h2>
           </div>
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-600">
-              <tr>
-                <th className="px-4 py-3 font-medium">Product</th>
-                <th className="px-4 py-3 font-medium">Current Stock</th>
-                <th className="px-4 py-3 font-medium">Minimum</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lowStockProducts.map((product) => (
-                <tr key={product.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3 text-gray-900">{product.name}</td>
-                  <td className="px-4 py-3 text-red-600 font-medium">
-                    {product.currentStock} {product.unit}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {product.minimumStock} {product.unit}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Product</th>
+                  <th className="px-4 py-3 font-medium">Current Stock</th>
+                  <th className="px-4 py-3 font-medium">Minimum</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {lowStockProducts.map((product) => (
+                  <tr key={product.id} className="border-t border-gray-100 dark:border-gray-800">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">{product.name}</td>
+                    <td className="px-4 py-3 font-medium text-red-600 dark:text-red-400">
+                      {product.currentStock} {product.unit}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                      {product.minimumStock} {product.unit}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

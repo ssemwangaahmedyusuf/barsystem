@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
       where: { id: orderId },
       data: { status: "PAID" },
     });
+
+    if (order.tableId) {
+      await prisma.barTable.update({
+        where: { id: order.tableId },
+        data: { status: "AVAILABLE" },
+      });
+    }
   }
 
   return NextResponse.json({ success: true, payment });
