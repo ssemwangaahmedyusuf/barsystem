@@ -43,7 +43,7 @@ export default function EditCapacityForm({
     return (
       <button
         onClick={() => setEditing(true)}
-        className="mt-1 text-xs text-gray-400 underline hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+        className="rounded-md border border-gray-300 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
       >
         Edit seats
       </button>
@@ -51,26 +51,26 @@ export default function EditCapacityForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-1 flex items-center justify-center gap-1">
+    <form onSubmit={handleSubmit} className="flex items-center gap-1">
       <input
         type="number"
         min={1}
         value={capacity}
         onChange={(e) => setCapacity(e.target.value)}
         autoFocus
-        className="w-14 rounded border border-gray-300 px-1 py-0.5 text-center text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        className="w-14 rounded border border-gray-300 px-1 py-1 text-center text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
       />
       <button
         type="submit"
         disabled={loading}
-        className="text-xs font-medium text-gray-700 underline disabled:opacity-50 dark:text-gray-300"
+        className="rounded-md border border-gray-300 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
       >
         Save
       </button>
       <button
         type="button"
         onClick={() => setEditing(false)}
-        className="text-xs text-gray-400 underline dark:text-gray-500"
+        className="rounded-md border border-gray-300 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
       >
         Cancel
       </button>

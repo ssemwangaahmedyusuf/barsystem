@@ -34,7 +34,11 @@ export default function StatusToggleButton({
     <button
       onClick={handleClick}
       disabled={loading}
-      className="text-xs font-medium text-gray-600 underline hover:text-gray-900 disabled:opacity-50 dark:text-gray-400 dark:hover:text-white"
+      className={`rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-50 ${
+        isOccupied
+          ? "border-green-300 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-800 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900"
+          : "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900"
+      }`}
     >
       {loading ? "Updating..." : label}
     </button>
