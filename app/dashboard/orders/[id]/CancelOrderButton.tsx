@@ -30,7 +30,7 @@ export default function CancelOrderButton({ orderId }: { orderId: string }) {
     <button
       onClick={handleCancel}
       disabled={loading}
-      className="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+      className="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
     >
       {loading ? "Cancelling..." : "Cancel Order"}
     </button>

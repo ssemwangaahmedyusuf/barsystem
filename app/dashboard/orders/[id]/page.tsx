@@ -48,11 +48,11 @@ export default async function OrderDetailPage({
     <div>
       <div className="no-print flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Order {order.orderNumber}</h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Order {order.orderNumber}</h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             {order.table?.name || "Counter"} · Waiter: {order.waiter?.firstName} {order.waiter?.lastName} · Status: {order.status}
           </p>
-          <p className="mt-1 text-sm text-gray-500">Placed: {formattedDate}</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-500">Placed: {formattedDate}</p>
         </div>
         <div className="flex items-center gap-3">
           <PrintButton />
@@ -61,9 +61,9 @@ export default async function OrderDetailPage({
       </div>
 
       <div className="no-print mt-6 grid grid-cols-3 gap-6">
-        <div className="col-span-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="col-span-2 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
               <tr>
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Qty</th>
@@ -73,43 +73,43 @@ export default async function OrderDetailPage({
             </thead>
             <tbody>
               {order.items.map((item) => (
-                <tr key={item.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3 text-gray-900">{item.product.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{item.quantity}</td>
-                  <td className="px-4 py-3 text-gray-600">{item.unitPrice.toLocaleString()} UGX</td>
-                  <td className="px-4 py-3 text-gray-600">{item.total.toLocaleString()} UGX</td>
+                <tr key={item.id} className="border-t border-gray-100 dark:border-gray-800">
+                  <td className="px-4 py-3 text-gray-900 dark:text-white">{item.product.name}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.quantity}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.unitPrice.toLocaleString()} UGX</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.total.toLocaleString()} UGX</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
           <div className="space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Total</span>
-              <span className="text-gray-900">{order.total.toLocaleString()} UGX</span>
+              <span className="text-gray-600 dark:text-gray-400">Total</span>
+              <span className="text-gray-900 dark:text-white">{order.total.toLocaleString()} UGX</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Paid</span>
-              <span className="text-gray-900">{totalPaid.toLocaleString()} UGX</span>
+              <span className="text-gray-600 dark:text-gray-400">Paid</span>
+              <span className="text-gray-900 dark:text-white">{totalPaid.toLocaleString()} UGX</span>
             </div>
             <div className="flex justify-between font-semibold">
-              <span className="text-gray-900">Balance</span>
-              <span className="text-gray-900">{balance.toLocaleString()} UGX</span>
+              <span className="text-gray-900 dark:text-white">Balance</span>
+              <span className="text-gray-900 dark:text-white">{balance.toLocaleString()} UGX</span>
             </div>
           </div>
 
           {order.status === "CANCELLED" ? (
-            <p className="mt-4 border-t border-gray-100 pt-4 text-sm font-medium text-red-700">
+            <p className="mt-4 border-t border-gray-100 pt-4 text-sm font-medium text-red-700 dark:border-gray-800 dark:text-red-400">
               This order was cancelled.
             </p>
           ) : balance > 0 ? (
-            <div className="mt-4 border-t border-gray-100 pt-4">
+            <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
               <PaymentForm orderId={order.id} balance={balance} />
             </div>
           ) : (
-            <p className="mt-4 border-t border-gray-100 pt-4 text-sm font-medium text-green-700">
+            <p className="mt-4 border-t border-gray-100 pt-4 text-sm font-medium text-green-700 dark:border-gray-800 dark:text-green-400">
               Fully paid
             </p>
           )}

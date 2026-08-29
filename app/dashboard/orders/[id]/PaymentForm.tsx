@@ -39,12 +39,12 @@ export default function PaymentForm({
   }
 
   const inputClass =
-    "mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none";
+    "mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Amount (UGX)</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount (UGX)</label>
         <input
           type="number"
           value={amount}
@@ -54,7 +54,7 @@ export default function PaymentForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Method</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Method</label>
         <select value={method} onChange={(e) => setMethod(e.target.value)} className={inputClass}>
           <option value="CASH">Cash</option>
           <option value="MOBILE_MONEY">Mobile Money</option>
@@ -62,12 +62,12 @@ export default function PaymentForm({
         </select>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
       >
         {loading ? "Recording..." : "Record Payment"}
       </button>
