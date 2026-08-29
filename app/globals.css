@@ -29,3 +29,20 @@ input, select, textarea {
   color-scheme: light;
   caret-color: #111827;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-receipt {
+    display: block !important;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    font-family: monospace;
+  }
+}
+
+.print-receipt {
+  display: none;
+}

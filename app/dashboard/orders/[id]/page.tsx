@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import PaymentForm from "./PaymentForm";
 import CancelOrderButton from "./CancelOrderButton";
+import PrintButton from "./PrintButton";
+import Receipt from "./Receipt";
 
 export default async function OrderDetailPage({
   params,
@@ -44,7 +46,7 @@ export default async function OrderDetailPage({
 
   return (
     <div>
-      <div className="flex items-start justify-between">
+      <div className="no-print flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Order {order.orderNumber}</h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -52,10 +54,13 @@ export default async function OrderDetailPage({
           </p>
           <p className="mt-1 text-sm text-gray-500">Placed: {formattedDate}</p>
         </div>
-        {canCancel && <CancelOrderButton orderId={order.id} />}
+        <div className="flex items-center gap-3">
+          <PrintButton />
+          {canCancel && <CancelOrderButton orderId={order.id} />}
+        </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-6">
+      <div className="no-print mt-6 grid grid-cols-3 gap-6">
         <div className="col-span-2 overflow-hidden rounded-lg border border-gray-200 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-600">
@@ -110,6 +115,16 @@ export default async function OrderDetailPage({
           )}
         </div>
       </div>
+
+      <Receipt
+        orderNumber={order.orderNumber}
+        tableName={order.table?.name || "Counter"}
+        waiterName={`${order.waiter?.firstName || ""} ${order.waiter?.lastName || ""}`.trim() || "-"}
+        date={formattedDate}
+        items={order.items}
+        total={order.total}
+        totalPaid={totalPaid}
+      />
     </div>
   );
 }
