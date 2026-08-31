@@ -4,6 +4,12 @@ import { useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 import NotificationBell from "./NotificationBell";
 
+function roleLabel(role: string) {
+  if (role === "MANAGER") return "Manager";
+  if (role === "WAITER") return "Waiter";
+  return role;
+}
+
 export default function Header({
   userName,
   role,
@@ -22,7 +28,9 @@ export default function Header({
     <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-800 dark:bg-gray-900">
       <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Bar Management System</h1>
       <div className="flex items-center gap-3">
-        <span className="hidden text-sm text-gray-700 sm:inline dark:text-gray-300">Welcome, {userName}</span>
+        <span className="hidden text-sm text-gray-700 sm:inline dark:text-gray-300">
+          Welcome, {userName}, {roleLabel(role)}
+        </span>
         {role === "MANAGER" && <NotificationBell />}
         <ThemeToggle />
         <button
