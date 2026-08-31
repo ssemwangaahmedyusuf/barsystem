@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { getBusinessDayStart, getBusinessDayEnd } from "@/lib/business-day";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -9,15 +10,16 @@ export default async function DashboardPage() {
     : null;
   const isManager = currentUser?.role === "MANAGER";
 
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const businessDayStart = getBusinessDayStart();
+  const businessDayEnd = getBusinessDayEnd(businessDayStart);
 
   const [todaysOrders, openOrders, allActiveProducts] = await Promise.all([
     prisma.order.findMany({
       where: {
-        createdAt: { gte: startOfToday },
+        createdAt: { gte: businessDayStart, lt: businessDayEnd },
         status: { not: "CANCELLED" },
       },
+      include: { items: { include: { product: true } } },
     }),
     prisma.order.count({
       where: { status: "OPEN" },
@@ -30,9 +32,20 @@ export default async function DashboardPage() {
 
   const todaysSales = todaysOrders.reduce((sum, o) => sum + o.total, 0);
   const todaysOrderCount = todaysOrders.length;
+
+  const todaysProfit = todaysOrders.reduce((sum, order) => {
+    const orderProfit = order.items.reduce((itemSum, item) => {
+      const costTotal = item.product.costPrice * item.quantity;
+      return itemSum + (item.total - costTotal);
+    }, 0);
+    return sum + orderProfit;
+  }, 0);
+
   const lowStockProducts = allActiveProducts.filter(
     (p) => p.currentStock <= p.minimumStock
   );
+
+  const dayLabel = new Intl.DateTimeFormat("en-UG", { dateStyle: "medium" }).format(businessDayStart);
 
   return (
     <div>
@@ -40,8 +53,13 @@ export default async function DashboardPage() {
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         Welcome to your bar management dashboard.
       </p>
+      {isManager && (
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          Business day: {dayLabel} 8:00 AM – next day 8:00 AM
+        </p>
+      )}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {isManager && (
           <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <p className="text-sm text-gray-600 dark:text-gray-400">Today's Sales</p>
@@ -49,6 +67,16 @@ export default async function DashboardPage() {
               {todaysSales.toLocaleString()} UGX
             </p>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">{todaysOrderCount} order(s) today</p>
+          </div>
+        )}
+
+        {isManager && (
+          <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Today's Profit</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+              {todaysProfit.toLocaleString()} UGX
+            </p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Sales minus cost price</p>
           </div>
         )}
 
