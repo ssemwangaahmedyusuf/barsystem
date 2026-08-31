@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getBusinessDayStart, getBusinessDayEnd } from "@/lib/business-day";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -23,6 +24,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const sessionExpiry = getBusinessDayEnd(getBusinessDayStart());
+
+  await prisma.notification.create({
+    data: {
+      type: "LOGIN",
+      message: `${user.firstName} ${user.lastName} logged in`,
+      userId: user.id,
+    },
+  });
+
   const response = NextResponse.json({
     success: true,
     user: {
@@ -37,7 +48,7 @@ export async function POST(request: NextRequest) {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 12, // 12 hours
+    expires: sessionExpiry,
   });
 
   return response;

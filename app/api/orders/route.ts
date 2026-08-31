@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
   const orderNumber = `ORD-${Date.now()}`;
 
   const order = await prisma.$transaction(async (tx) => {
+    const waiter = await tx.user.findUnique({ where: { id: userId } });
+
     const created = await tx.order.create({
       data: {
         orderNumber,
@@ -86,6 +88,15 @@ export async function POST(request: NextRequest) {
         data: { status: "OCCUPIED" },
       });
     }
+
+    const waiterName = waiter ? `${waiter.firstName} ${waiter.lastName}` : "A staff member";
+    await tx.notification.create({
+      data: {
+        type: "ORDER_PLACED",
+        message: `${waiterName} placed order ${orderNumber} (${created.total.toLocaleString()} UGX)`,
+        userId,
+      },
+    });
 
     return created;
   });

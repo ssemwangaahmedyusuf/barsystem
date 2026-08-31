@@ -20,22 +20,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Stock issued to this user when they are working as a waiter
   stockIssuesAsWaiter StockIssue[] @relation("waiterUser")
-
-  // Stock returned by this user when they are working as a waiter
   stockReturnsAsWaiter StockReturn[] @relation("waiterUser")
-
-  // User who issued stock / counter staff
   stockIssuesAsIssuer StockIssue[] @relation("issuerUser")
-
-  // User who processed stock returns / counter staff
   stockReturnsAsProcessor StockReturn[] @relation("processorUser")
-
-  // Orders handled by this waiter
   ordersAsWaiter Order[] @relation("waiterOrders")
-
-  // Payments processed by this user
   paymentsAsCashier Payment[] @relation("cashierPayments")
 
   createdAtStockIssues  StockIssue[]  @relation("createdByUser")
@@ -45,6 +34,8 @@ model User {
   updatedAtProducts Product[] @relation("productUpdatedBy")
 
   createdAtOrders Order[] @relation("orderCreatedBy")
+
+  notifications Notification[]
 
   @@index([role])
   @@index([isActive])
@@ -259,4 +250,19 @@ model Payment {
   @@index([cashierId])
   @@index([method])
   @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // "LOGIN" | "ORDER_PLACED"
+  message   String
+  userId    String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([read])
+  @@index([createdAt])
+  @@index([type])
 }

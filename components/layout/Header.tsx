@@ -2,11 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 
 export default function Header({
   userName,
+  role,
 }: {
   userName: string;
+  role: string;
 }) {
   const router = useRouter();
 
@@ -20,6 +23,7 @@ export default function Header({
       <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Bar Management System</h1>
       <div className="flex items-center gap-3">
         <span className="hidden text-sm text-gray-700 sm:inline dark:text-gray-300">Welcome, {userName}</span>
+        {role === "MANAGER" && <NotificationBell />}
         <ThemeToggle />
         <button
           onClick={handleLogout}
