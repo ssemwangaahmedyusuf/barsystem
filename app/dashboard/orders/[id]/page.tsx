@@ -5,6 +5,7 @@ import PaymentForm from "./PaymentForm";
 import CancelOrderButton from "./CancelOrderButton";
 import PrintButton from "./PrintButton";
 import Receipt from "./Receipt";
+import RefundItemButton from "./RefundItemButton";
 
 export default async function OrderDetailPage({
   params,
@@ -23,7 +24,7 @@ export default async function OrderDetailPage({
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      items: { include: { product: true } },
+      items: { include: { product: true, refunds: true } },
       table: true,
       waiter: true,
       payments: true,
@@ -69,17 +70,33 @@ export default async function OrderDetailPage({
                 <th className="px-4 py-3 font-medium">Qty</th>
                 <th className="px-4 py-3 font-medium">Unit Price</th>
                 <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Refunded</th>
+                <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item) => (
-                <tr key={item.id} className="border-t border-gray-100 dark:border-gray-800">
-                  <td className="px-4 py-3 text-gray-900 dark:text-white">{item.product.name}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.quantity}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.unitPrice.toLocaleString()} UGX</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.total.toLocaleString()} UGX</td>
-                </tr>
-              ))}
+              {order.items.map((item) => {
+                const refundedQty = item.refunds.reduce((sum, r) => sum + r.quantity, 0);
+                const remaining = item.quantity - refundedQty;
+                return (
+                  <tr key={item.id} className="border-t border-gray-100 dark:border-gray-800">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">{item.product.name}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.quantity}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.unitPrice.toLocaleString()} UGX</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.total.toLocaleString()} UGX</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{refundedQty > 0 ? refundedQty : "-"}</td>
+                    <td className="px-4 py-3">
+                      {isManager && order.status !== "CANCELLED" && remaining > 0 && (
+                        <RefundItemButton
+                          orderItemId={item.id}
+                          productName={item.product.name}
+                          remaining={remaining}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

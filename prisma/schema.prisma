@@ -20,12 +20,13 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  stockIssuesAsWaiter StockIssue[] @relation("waiterUser")
-  stockReturnsAsWaiter StockReturn[] @relation("waiterUser")
-  stockIssuesAsIssuer StockIssue[] @relation("issuerUser")
+  stockIssuesAsWaiter     StockIssue[]  @relation("waiterUser")
+  stockReturnsAsWaiter    StockReturn[] @relation("waiterUser")
+  stockIssuesAsIssuer     StockIssue[]  @relation("issuerUser")
   stockReturnsAsProcessor StockReturn[] @relation("processorUser")
-  ordersAsWaiter Order[] @relation("waiterOrders")
-  paymentsAsCashier Payment[] @relation("cashierPayments")
+  ordersAsWaiter          Order[]       @relation("waiterOrders")
+  paymentsAsCashier       Payment[]     @relation("cashierPayments")
+  refundsAuthorized       Refund[]
 
   createdAtStockIssues  StockIssue[]  @relation("createdByUser")
   createdAtStockReturns StockReturn[] @relation("createdByUser")
@@ -206,6 +207,7 @@ model Order {
   customer  Customer? @relation(fields: [customerId], references: [id])
 
   items    OrderItem[]
+  refunds  Refund[]
   payments Payment[]
 
   @@index([waiterId])
@@ -225,8 +227,9 @@ model OrderItem {
   total     Float
   createdAt DateTime @default(now())
 
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product  @relation(fields: [productId], references: [id])
+  refunds Refund[]
 
   @@index([orderId])
   @@index([productId])
@@ -254,7 +257,7 @@ model Payment {
 
 model Notification {
   id        String   @id @default(cuid())
-  type      String   // "LOGIN" | "ORDER_PLACED"
+  type      String // "LOGIN" | "ORDER_PLACED"
   message   String
   userId    String?
   read      Boolean  @default(false)
@@ -265,4 +268,19 @@ model Notification {
   @@index([read])
   @@index([createdAt])
   @@index([type])
+}
+
+model Refund {
+  id             String    @id @default(cuid())
+  orderId        String
+  order          Order     @relation(fields: [orderId], references: [id])
+  orderItemId    String
+  orderItem      OrderItem @relation(fields: [orderItemId], references: [id])
+  quantity       Int
+  amount         Int
+  restocked      Boolean   @default(true)
+  reason         String?
+  authorizedById String
+  authorizedBy   User      @relation(fields: [authorizedById], references: [id])
+  createdAt      DateTime  @default(now())
 }
