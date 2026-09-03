@@ -41,7 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white dark:bg-gray-950">{children}</body>
+      <body className="min-h-full flex flex-col bg-white dark:bg-gray-950">
+        {children}
+      </body>
     </html>
   );
 }

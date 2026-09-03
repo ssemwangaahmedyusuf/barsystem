@@ -30,14 +30,17 @@ export async function POST(request: NextRequest) {
 
   const orderItem = await prisma.orderItem.findUnique({
     where: { id: orderItemId },
-    include: { product: true, refunds: true },
+    include: { product: true, refundItems: true },
   });
 
   if (!orderItem) {
     return NextResponse.json({ error: "Order item not found" }, { status: 404 });
   }
 
-  const alreadyRefunded = orderItem.refunds.reduce((sum, r) => sum + r.quantity, 0);
+  const alreadyRefunded = orderItem.refundItems.reduce(
+    (sum: number, r: { quantity: number }) => sum + r.quantity,
+    0
+  );
   const remaining = orderItem.quantity - alreadyRefunded;
 
   if (quantity > remaining) {
@@ -48,19 +51,29 @@ export async function POST(request: NextRequest) {
   }
 
   const amount = orderItem.unitPrice * quantity;
-  const shouldRestock = restocked !== false; // defaults to true unless explicitly false
+  const shouldRestock = restocked === true; // defaults to false unless explicitly true
+  const refundNumber = `REF-${Date.now()}`;
 
   const refund = await prisma.$transaction(async (tx) => {
     const created = await tx.refund.create({
       data: {
+        refundNumber,
         orderId: orderItem.orderId,
-        orderItemId: orderItem.id,
-        quantity,
+        managerId: manager.id,
         amount,
-        restocked: shouldRestock,
         reason: reason || null,
-        authorizedById: manager.id,
+        items: {
+          create: {
+            orderItemId: orderItem.id,
+            productId: orderItem.productId,
+            quantity,
+            unitPrice: orderItem.unitPrice,
+            total: amount,
+            restocked: shouldRestock,
+          },
+        },
       },
+      include: { items: true },
     });
 
     if (shouldRestock) {
@@ -70,10 +83,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // NOTE: waiter sales tallies appear to be computed on the fly from
-    // Order/Payment records rather than stored — if so, tally queries
-    // (dashboard, End Day) need to subtract Refund.amount for the period,
-    // not this route. Flag if that assumption is wrong.
+    await tx.notification.create({
+      data: {
+        type: "REFUND",
+        message: `${manager.firstName} ${manager.lastName} refunded ${quantity} x ${orderItem.product.name} (${amount.toLocaleString()} UGX)`,
+        userId: manager.id,
+      },
+    });
 
     return created;
   });

@@ -26,7 +26,7 @@ model User {
   stockReturnsAsProcessor StockReturn[] @relation("processorUser")
   ordersAsWaiter          Order[]       @relation("waiterOrders")
   paymentsAsCashier       Payment[]     @relation("cashierPayments")
-  refundsAuthorized       Refund[]
+  refundsAsManager        Refund[]      @relation("refundManager")
 
   createdAtStockIssues  StockIssue[]  @relation("createdByUser")
   createdAtStockReturns StockReturn[] @relation("createdByUser")
@@ -75,6 +75,7 @@ model Product {
   stockIssues  StockIssueItem[]
   stockReturns StockReturnItem[]
   orderItems   OrderItem[]
+  refundItems  RefundItem[]
 
   createdById String?
   createdBy   User?   @relation("productCreatedBy", fields: [createdById], references: [id])
@@ -207,8 +208,8 @@ model Order {
   customer  Customer? @relation(fields: [customerId], references: [id])
 
   items    OrderItem[]
-  refunds  Refund[]
   payments Payment[]
+  refunds  Refund[]
 
   @@index([waiterId])
   @@index([createdById])
@@ -227,9 +228,9 @@ model OrderItem {
   total     Float
   createdAt DateTime @default(now())
 
-  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product  @relation(fields: [productId], references: [id])
-  refunds Refund[]
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product      @relation(fields: [productId], references: [id])
+  refundItems RefundItem[]
 
   @@index([orderId])
   @@index([productId])
@@ -271,16 +272,38 @@ model Notification {
 }
 
 model Refund {
-  id             String    @id @default(cuid())
-  orderId        String
-  order          Order     @relation(fields: [orderId], references: [id])
-  orderItemId    String
-  orderItem      OrderItem @relation(fields: [orderItemId], references: [id])
-  quantity       Int
-  amount         Int
-  restocked      Boolean   @default(true)
-  reason         String?
-  authorizedById String
-  authorizedBy   User      @relation(fields: [authorizedById], references: [id])
-  createdAt      DateTime  @default(now())
+  id           String   @id @default(cuid())
+  refundNumber String   @unique
+  orderId      String
+  managerId    String
+  amount       Float
+  reason       String?
+  createdAt    DateTime @default(now())
+
+  order   Order        @relation(fields: [orderId], references: [id])
+  manager User         @relation("refundManager", fields: [managerId], references: [id])
+  items   RefundItem[]
+
+  @@index([orderId])
+  @@index([managerId])
+  @@index([createdAt])
+}
+
+model RefundItem {
+  id          String  @id @default(cuid())
+  refundId    String
+  orderItemId String
+  productId   String
+  quantity    Float
+  unitPrice   Float
+  total       Float
+  restocked   Boolean @default(false)
+
+  refund    Refund    @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@index([refundId])
+  @@index([orderItemId])
+  @@index([productId])
 }

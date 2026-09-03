@@ -24,7 +24,7 @@ export default async function OrderDetailPage({
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      items: { include: { product: true, refunds: true } },
+      items: { include: { product: true, refundItems: true } },
       table: true,
       waiter: true,
       payments: true,
@@ -63,6 +63,7 @@ export default async function OrderDetailPage({
 
       <div className="no-print mt-6 grid grid-cols-3 gap-6">
         <div className="col-span-2 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
               <tr>
@@ -76,7 +77,7 @@ export default async function OrderDetailPage({
             </thead>
             <tbody>
               {order.items.map((item) => {
-                const refundedQty = item.refunds.reduce((sum, r) => sum + r.quantity, 0);
+                const refundedQty = item.refundItems.reduce((sum, r) => sum + r.quantity, 0);
                 const remaining = item.quantity - refundedQty;
                 return (
                   <tr key={item.id} className="border-t border-gray-100 dark:border-gray-800">
@@ -99,6 +100,7 @@ export default async function OrderDetailPage({
               })}
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
